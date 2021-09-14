@@ -1,4 +1,6 @@
 import pygame
+from time import time 
+
 
 pygame.init()
 
@@ -17,8 +19,11 @@ game_over = 0
 main_menu = True
 
 # load images
+
+background_surface = pygame.Surface((screen_width, screen_height))
+background_surface.fill((0, 0, 0))
+
 sun_img = pygame.image.load("img/sun.png")
-bg_img = pygame.image.load("img/sky.png")
 restart_img = pygame.image.load("img/restart_btn.png")
 start_img = pygame.image.load("img/start_btn.png")
 exit_img = pygame.image.load("img/exit_btn.png")
@@ -270,12 +275,16 @@ start_button = Button(screen_width // 2 - 350, screen_height // 2, start_img)
 exit_button = Button(screen_width // 2 + 150, screen_height // 2, exit_img)
 
 run = True
-
+old_time = time()
 while run:
-
+    #print("Start", time() - old_time)
     clock.tick(fps)
-    screen.blit(bg_img, (0, 0))
+    screen.blit(background_surface, (0, 0))
+    
+    #print("blit bg", time() - old_time)
+
     screen.blit(sun_img, (100, 100))
+    #print("blit sun", time() - old_time)
 
     if main_menu == True:
         if exit_button.draw():
@@ -285,6 +294,7 @@ while run:
 
     else:
         world.draw()
+        #print("world", time() - old_time)
 
         # if player alive
         if game_over == 0:
@@ -305,5 +315,6 @@ while run:
             run = False
 
     pygame.display.update()
+    old_time = time()
 
 pygame.quit()
