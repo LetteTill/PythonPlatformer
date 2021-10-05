@@ -1,5 +1,7 @@
 import pygame
-from time import time 
+from time import time
+import pickle
+from os import path
 
 
 pygame.init()
@@ -13,13 +15,23 @@ screen_height = 1000
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('JnR')
 
+
+# fonts n stuff
+font_score = pygame.font.SysFont("PibotoLt", 30)
+font_gameover = pygame.font.SysFont("PibotoLt", 70)
+
+# colors
+white = (255,255,255)
+
 # define game variables
 tile_size = 50
 game_over = 0
 main_menu = True
+level = 1
+max_levels = 7
+score = 0
 
 # load images
-
 background_surface = pygame.Surface((screen_width, screen_height))
 background_surface.fill((0, 0, 0))
 
@@ -27,6 +39,35 @@ sun_img = pygame.image.load("img/sun.png")
 restart_img = pygame.image.load("img/restart_btn.png")
 start_img = pygame.image.load("img/start_btn.png")
 exit_img = pygame.image.load("img/exit_btn.png")
+
+
+# functions:
+
+# text draw function:
+
+def draw_text(text, font, text_color, x, y):
+    img = font.render(text, True, text_color)
+    screen.blit(img, (x,y))
+    
+
+
+# level reset function:
+
+def reset_lvl(level):
+    player.reset(100, screen_height -130)
+    blob_group.empty()
+    lava_group.empty()
+    exit_group.empty()
+    
+    
+    # load lvl data n create world (again lulw)
+    if path.exists(f"lvl/level{level}_data"):
+        pickle_in = open(f"lvl/level{level}_data", "rb")
+        world_data = pickle.load(pickle_in)
+    world = World(world_data)
+    
+    return world;
+    
 
 
 class Button():
@@ -130,6 +171,10 @@ class Player():
             # check for collision with enemy
             if pygame.sprite.spritecollide(self, lava_group, False):
                 game_over = -1
+            # check for colision with exit
+            if pygame.sprite.spritecollide(self, exit_group, False):
+                game_over = 1
+            
 
             # update player collision
             self.rect.x += dx
@@ -201,6 +246,12 @@ class World():
                 if tile == 6:
                     lava = Lava(col_count * tile_size, row_count * tile_size + (tile_size // 2))
                     lava_group.add(lava)
+                if tile == 7:
+                    coin = Coin(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2))
+                    coin_group.add(coin)
+                if tile == 8:
+                    exit = Exit(col_count * tile_size, row_count * tile_size - (tile_size // 2))
+                    exit_group.add(exit)
 
                 col_count += 1
             row_count += 1
@@ -237,36 +288,44 @@ class Lava(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        
+
+class Coin(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        img = pygame.image.load("img/coin.png")
+        self.image = pygame.transform.scale(img, (tile_size // 2, tile_size // 2))
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
 
 
-world_data = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 1],
-    [1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 2, 2, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 7, 0, 5, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 1],
-    [1, 7, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 7, 0, 0, 0, 0, 1],
-    [1, 0, 2, 0, 0, 7, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 2, 0, 0, 4, 0, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 7, 0, 0, 0, 0, 2, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 2, 2, 2, 2, 2, 1],
-    [1, 0, 0, 0, 0, 0, 2, 2, 2, 6, 6, 6, 6, 6, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-]
+class Exit(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        img = pygame.image.load("img/exit.png")
+        self.image = pygame.transform.scale(img, (tile_size, int(tile_size * 1.5)))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
 
 player = Player(100, screen_height - 130)
 
 blob_group = pygame.sprite.Group()
 lava_group = pygame.sprite.Group()
+coin_group = pygame.sprite.Group()
+exit_group = pygame.sprite.Group()
 
+# dummy coin for score
+score_coin = Coin(tile_size //2 , tile_size //2)
+coin_group.add(score_coin)
+
+
+
+# load lvl data n create world
+if path.exists(f"lvl/level{level}_data"):
+    pickle_in = open(f"lvl/level{level}_data", "rb")
+    world_data = pickle.load(pickle_in)
 world = World(world_data)
 
 # create buttons
@@ -283,7 +342,7 @@ while run:
     
     #print("blit bg", time() - old_time)
 
-    screen.blit(sun_img, (100, 100))
+    #screen.blit(sun_img, (100, 100))
     #print("blit sun", time() - old_time)
 
     if main_menu == True:
@@ -299,16 +358,45 @@ while run:
         # if player alive
         if game_over == 0:
             blob_group.update()
+            # update se score
+            if pygame.sprite.spritecollide(player, coin_group, True):
+                score += 1
+            draw_text("X " + str(score), font_score, white, (tile_size -10), 5)
+            
         blob_group.draw(screen)
         lava_group.draw(screen)
+        coin_group.draw(screen)
+        exit_group.draw(screen)
 
         game_over = player.update(game_over)
 
         # if player ded
         if game_over == -1:
+            draw_text("U DED", font_gameover, white, (screen_width //2) - 100, screen_height // 2)
             if restart_button.draw():
-                player.reset(100, screen_height - 130)
+                world_data = []
+                world = reset_lvl(level)
                 game_over = 0
+                score = 0
+                
+        # if player completes level
+        if game_over == 1:
+            level += 1
+            if level <= max_levels:
+                #reset lvl
+                world_data = []
+                world = reset_lvl(level)
+                game_over = 0
+                
+            else:
+                draw_text("U WIN POG!", font_gameover, white, (screen_width //2) - 140, screen_height // 2)
+                if restart_button.draw():
+                    level = 1
+                    world_data = []
+                    world = reset_lvl(level)
+                    game_over = 0
+                    score = 0
+            
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
