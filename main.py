@@ -457,7 +457,7 @@ while run:
                 game_over = 0
 
             else:
-                draw_text("U WIN POG!", font_gameover, white, (screen_width // 2) - 140, screen_height // 2 -50)
+                draw_text("U WIN POG!", font_gameover, white, (screen_width // 2) - 140, screen_height // 2 -100)
                 if restart_button.draw():
                     level = 1
                     world_data = []
