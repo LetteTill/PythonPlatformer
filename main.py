@@ -43,8 +43,8 @@ start_img = pygame.image.load("img/start_btn.png")
 exit_img = pygame.image.load("img/exit_btn.png")
 
 # load sounds
-pygame.mixer.music.load("img/music.wav")
-pygame.mixer.music.set_volume(0.5)
+pygame.mixer.music.load("img_new/chill.wav")
+pygame.mixer.music.set_volume(0.2)
 pygame.mixer.music.play(-1, 0.0, 5000)
 
 coin_fx = pygame.mixer.Sound("img/coin.wav")
@@ -55,6 +55,10 @@ jump_fx.set_volume(0.5)
 
 game_over_fx = pygame.mixer.Sound("img/game_over.wav")
 game_over_fx.set_volume(0.5)
+
+cheer_fx = pygame.mixer.Sound("img_new/cheer.wav")
+cheer_fx.set_volume(0.5)
+
 
 
 # functions:
@@ -191,6 +195,7 @@ class Player():
                 game_over_fx.play()
             # check for collision with exit
             if pygame.sprite.spritecollide(self, exit_group, False):
+                cheer_fx.play()
                 game_over = 1
 
             # check for collision with platform
@@ -232,8 +237,8 @@ class Player():
         self.images_left = []
         self.index = 0
         self.counter = 0
-        for num in range(1, 5):
-            img_right = pygame.image.load(f'img/guy{num}.png')
+        for num in range(1, 4):
+            img_right = pygame.image.load(f'img_new/Walk{num}.png')
             img_right = self.image = pygame.transform.scale(img_right, (40, 80))
             img_left = pygame.transform.flip(img_right, True, False)
             self.images_right.append(img_right)
