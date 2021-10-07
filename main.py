@@ -47,6 +47,8 @@ pygame.mixer.music.load("img_new/chill.wav")
 pygame.mixer.music.set_volume(0.2)
 pygame.mixer.music.play(-1, 0.0, 5000)
 
+
+
 coin_fx = pygame.mixer.Sound("img/coin.wav")
 coin_fx.set_volume(0.5)
 
@@ -188,10 +190,12 @@ class Player():
             # check for collision with enemy
             if pygame.sprite.spritecollide(self, blob_group, False):
                 game_over = -1
+                pygame.mixer.music.pause()
                 game_over_fx.play()
             # check for collision with enemy
             if pygame.sprite.spritecollide(self, lava_group, False):
                 game_over = -1
+                pygame.mixer.music.pause()
                 game_over_fx.play()
             # check for collision with exit
             if pygame.sprite.spritecollide(self, exit_group, False):
@@ -450,6 +454,7 @@ while run:
                 world_data = []
                 world = reset_lvl(level)
                 game_over = 0
+                pygame.mixer.music.unpause()
                 score = 0
 
         # if player completes level
@@ -460,14 +465,17 @@ while run:
                 world_data = []
                 world = reset_lvl(level)
                 game_over = 0
+                pygame.mixer.music.unpause()
 
             else:
                 draw_text("U WIN POG!", font_gameover, white, (screen_width // 2) - 140, screen_height // 2 -100)
+                pygame.mixer.music.rewind()
                 if restart_button.draw():
                     level = 1
                     world_data = []
                     world = reset_lvl(level)
                     game_over = 0
+                    pygame.mixer.music.play()
                     score = 0
 
     for event in pygame.event.get():
